@@ -63,10 +63,12 @@ function collectJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = "";
     req.on("data", (chunk) => {
-      body += chunk;
-      if (body.length > 5 * 1024 * 1024) {
+      if (body.length + chunk.length > 5 * 1024 * 1024) {
         reject(new Error("Body too large"));
+        req.destroy();
+        return;
       }
+      body += chunk;
     });
     req.on("end", () => {
       try {

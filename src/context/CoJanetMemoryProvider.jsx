@@ -27,8 +27,7 @@ function mergeMemoryObjects(base, incoming) {
     sync: {
       ...(left.sync || {}),
       ...(right.sync || {})
-    },
-    updatedAt: new Date().toISOString()
+    }
   };
 
   [
@@ -101,7 +100,7 @@ function CoJanetMemoryProvider(props) {
     (projectId && getStorageValue(localStorageKey)) || null;
   const [memory, setMemory] = React.useState(initialMemory || {});
   const [client, setClient] = React.useState(initialClient);
-  const [peers] = React.useState([]);
+  const peers = [];
   const [syncState, setSyncState] = React.useState({
     registered: Boolean(initialClient),
     subscribed: false,

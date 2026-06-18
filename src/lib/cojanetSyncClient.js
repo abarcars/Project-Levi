@@ -96,7 +96,10 @@ function subscribe(serverUrl, projectId, clientToken, onMemory) {
     try {
       onMemory(JSON.parse(event.data));
     } catch (error) {
-      onMemory(null, error);
+      onMemory(null, {
+        message: error.message,
+        rawData: event.data
+      });
     }
   });
 
