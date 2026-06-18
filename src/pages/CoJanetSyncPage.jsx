@@ -64,9 +64,17 @@ function CoJanetSyncPage(props) {
         {
           type: "button",
           onClick: () =>
-            runAction("Push", () =>
-              memoryApi.pushRemote(JSON.parse(draftMemory || "{}"), "merge")
-            )
+            runAction("Push", () => {
+              let parsedDraft;
+
+              try {
+                parsedDraft = JSON.parse(draftMemory || "{}");
+              } catch (error) {
+                throw new Error(`Invalid JSON: ${error.message}`);
+              }
+
+              return memoryApi.pushRemote(parsedDraft, "merge");
+            })
         },
         "Push local"
       ),

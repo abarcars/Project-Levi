@@ -94,7 +94,7 @@ function subscribe(serverUrl, projectId, clientToken, onMemoryUpdate) {
     }
 
     try {
-      onMemoryUpdate(JSON.parse(event.data));
+      onMemoryUpdate(JSON.parse(event.data), null);
     } catch (error) {
       onMemoryUpdate(null, {
         message: error.message,

@@ -31,6 +31,7 @@ const DATA_DIR = path.resolve(
     path.join(__dirname, "data")
 );
 const CLIENTS_FILE = path.join(DATA_DIR, "clients.json");
+// Reject oversized JSON payloads before buffering them fully in memory.
 const MAX_BODY_SIZE = 5 * 1024 * 1024;
 let eventCounter = 0;
 
@@ -252,6 +253,7 @@ function broadcastProjectUpdate(projectId, memory) {
     try {
       entry.res.write(`event: memory\nid: ${nextEventId()}\ndata: ${payload}\n\n`);
     } catch (error) {
+      console.warn("Failed to broadcast memory update:", error.message);
       removeSubscription(projectId, entry.id);
     }
   });
