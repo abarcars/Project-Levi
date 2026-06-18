@@ -1,0 +1,18 @@
+{
+  "name": "project-levi-cojanet",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start-server": "node server/cojanet-sync-server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
