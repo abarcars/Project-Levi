@@ -1,0 +1,43 @@
+// examples/github-action-sync-example.yml
+# Example GitHub Action: Auto-sync memory after an agent task completes.
+# Place this in .github/workflows/sync-memory.yml
+# This action runs after a Copilot agent task and pushes the memory to the sync server.
+
+name: Sync Co-Janet Memory
+
+on:
+  workflow_run:
+    workflows: ["Copilot Task"]
+    types: [completed]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync memory to Co-Janet
+        env:
+          COJANET_SERVER_URL: ${{ secrets.COJANET_SERVER_URL }}
+          COJANET_PROJECT_ID: ${{ secrets.COJANET_PROJECT_ID }}
+          COJANET_CLIENT_TOKEN: ${{ secrets.COJANET_CLIENT_TOKEN }}
+        run: |
+          # Option 1: Use the CLI
+          node bin/cojanet-sync pull > memory-from-server.json
+          echo "Current server memory:"
+          cat memory-from-server.json | jq '.jobs | length' --raw-output
+
+          # Option 2: Use the Node.js SDK in a custom script
+          # node examples/agent-sync-example.js
+
+      - name: Notify on sync failure
+        if: failure()
+        run: echo "Failed to sync memory to Co-Janet server"
