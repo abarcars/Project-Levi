@@ -67,7 +67,6 @@ function setStorageValue(key, value) {
 const defaultContextValue = {
   memory: {},
   client: null,
-  peers: [],
   syncState: {
     registered: false,
     subscribed: false,
@@ -100,7 +99,6 @@ function CoJanetMemoryProvider(props) {
     (projectId && getStorageValue(localStorageKey)) || null;
   const [memory, setMemory] = React.useState(initialMemory || {});
   const [client, setClient] = React.useState(initialClient);
-  const peers = [];
   const [syncState, setSyncState] = React.useState({
     registered: Boolean(initialClient),
     subscribed: false,
@@ -266,7 +264,6 @@ function CoJanetMemoryProvider(props) {
     () => ({
       memory,
       client,
-      peers,
       syncState,
       setMemory,
       registerClient,
@@ -274,7 +271,7 @@ function CoJanetMemoryProvider(props) {
       pushRemote,
       syncNow
     }),
-    [client, memory, peers, pullRemote, pushRemote, registerClient, syncNow, syncState]
+    [client, memory, pullRemote, pushRemote, registerClient, syncNow, syncState]
   );
 
   return React.createElement(

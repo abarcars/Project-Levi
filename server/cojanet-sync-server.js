@@ -29,6 +29,7 @@ const DATA_DIR = path.resolve(
     path.join(__dirname, "data")
 );
 const CLIENTS_FILE = path.join(DATA_DIR, "clients.json");
+const MAX_BODY_SIZE = 5 * 1024 * 1024;
 
 function nowIso() {
   return new Date().toISOString();
@@ -63,7 +64,7 @@ function collectJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = "";
     req.on("data", (chunk) => {
-      if (body.length + chunk.length > 5 * 1024 * 1024) {
+      if (body.length + chunk.length > MAX_BODY_SIZE) {
         reject(new Error("Body too large"));
         req.destroy();
         return;
