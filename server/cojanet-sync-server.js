@@ -32,6 +32,7 @@ const DATA_DIR = path.resolve(
 );
 const CLIENTS_FILE = path.join(DATA_DIR, "clients.json");
 const MAX_BODY_SIZE = 5 * 1024 * 1024;
+let eventCounter = 0;
 
 function nowIso() {
   return new Date().toISOString();
@@ -50,6 +51,11 @@ function writeJson(filePath, value) {
 
 function generateId() {
   return crypto.randomBytes(16).toString("hex");
+}
+
+function nextEventId() {
+  eventCounter += 1;
+  return String(eventCounter);
 }
 
 function sendJson(res, statusCode, payload) {
@@ -203,7 +209,7 @@ function isAuthorizedForProject(projectId, token) {
   return Boolean(client && client.projectId === projectId);
 }
 
-function requireAdmin(req, parsed) {
+function isAdminRequest(req, parsed) {
   if (!ADMIN_TOKEN) {
     return true;
   }
@@ -244,7 +250,7 @@ function broadcastProjectUpdate(projectId, memory) {
 
   entries.forEach((entry) => {
     try {
-      entry.res.write(`event: memory\nid: ${Date.now()}\ndata: ${payload}\n\n`);
+      entry.res.write(`event: memory\nid: ${nextEventId()}\ndata: ${payload}\n\n`);
     } catch (error) {
       removeSubscription(projectId, entry.id);
     }
@@ -268,7 +274,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && parsed.pathname === "/api/register") {
-    if (!requireAdmin(req, parsed)) {
+    if (!isAdminRequest(req, parsed)) {
       return sendJson(res, 401, { error: "admin required" });
     }
 
@@ -323,7 +329,7 @@ const server = http.createServer(async (req, res) => {
 
     addSubscription(projectId, subscription);
     res.write(
-      `event: memory\nid: ${Date.now()}\ndata: ${JSON.stringify(
+      `event: memory\nid: ${nextEventId()}\ndata: ${JSON.stringify(
         loadProjectMemory(projectId)
       )}\n\n`
     );

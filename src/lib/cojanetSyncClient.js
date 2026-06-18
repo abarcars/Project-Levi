@@ -76,7 +76,7 @@ async function pushRemote(serverUrl, projectId, clientToken, memory, mode) {
   return readJsonResponse(response);
 }
 
-function subscribe(serverUrl, projectId, clientToken, onMemory) {
+function subscribe(serverUrl, projectId, clientToken, onMemoryUpdate) {
   if (typeof EventSource === "undefined") {
     throw new Error("EventSource is not available in this environment");
   }
@@ -89,14 +89,14 @@ function subscribe(serverUrl, projectId, clientToken, onMemory) {
   );
 
   eventSource.addEventListener("memory", (event) => {
-    if (typeof onMemory !== "function") {
+    if (typeof onMemoryUpdate !== "function") {
       return;
     }
 
     try {
-      onMemory(JSON.parse(event.data));
+      onMemoryUpdate(JSON.parse(event.data));
     } catch (error) {
-      onMemory(null, {
+      onMemoryUpdate(null, {
         message: error.message,
         rawData: event.data
       });
