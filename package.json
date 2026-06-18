@@ -1,0 +1,10 @@
+{
+  "name": "project-levi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Co-Janet sync server, client SDK, React provider, and sync UI page.",
+  "scripts": {
+    "cojanet:server": "node server/cojanet-sync-server.js",
+    "check:cojanet": "node -e \"const fs=require('fs');const vm=require('vm');['server/cojanet-sync-server.js','src/lib/cojanetSyncClient.js','src/context/CoJanetMemoryProvider.jsx','src/pages/CoJanetSyncPage.jsx'].forEach((file)=>new vm.Script(fs.readFileSync(file,'utf8'),{filename:file}));console.log('Co-Janet source files parsed successfully.');\""
+  }
+}
