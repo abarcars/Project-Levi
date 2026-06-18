@@ -22,7 +22,7 @@ This branch adds a lightweight Co-Janet sync stack:
 npm run cojanet:server
 ```
 
-The server listens on `http://0.0.0.0:8787` by default and writes memory files to `server/data/`.
+The server listens on `http://127.0.0.1:8787` by default and writes memory files to `server/data/`.
 
 ### 2. Use the frontend helpers
 

@@ -7,6 +7,8 @@ const url = require("url");
 const CONFIG_PATH =
   process.env.COJANET_SYNC_CONFIG ||
   path.join(__dirname, "cojanet-sync-config.json");
+const DEFAULT_HOST = "127.0.0.1";
+const SCHEMA_VERSION = "1.1.0";
 
 function readJson(filePath, fallback) {
   try {
@@ -17,7 +19,7 @@ function readJson(filePath, fallback) {
 }
 
 const fileConfig = readJson(CONFIG_PATH, {});
-const HOST = process.env.COJANET_SYNC_HOST || fileConfig.host || "0.0.0.0";
+const HOST = process.env.COJANET_SYNC_HOST || fileConfig.host || DEFAULT_HOST;
 const PORT = Number(process.env.COJANET_SYNC_PORT || fileConfig.port || 8787);
 const ADMIN_TOKEN =
   process.env.COJANET_SYNC_TOKEN || fileConfig.adminToken || "";
@@ -128,7 +130,7 @@ function projectFile(projectId) {
 function createProjectSeed(projectId) {
   return {
     projectId,
-    schemaVersion: "1.1.0",
+    schemaVersion: SCHEMA_VERSION,
     memoryVersion: "remote",
     projects: [],
     artifacts: [],
