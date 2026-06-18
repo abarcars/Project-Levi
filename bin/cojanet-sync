@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+
+// bin/cojanet-sync
+// CLI tool: sync memory from command line or scripts.
+// Usage:
+//   cojanet-sync pull --server https://... --project career-ops --token abc123
+//   cojanet-sync push --server https://... --project career-ops --token abc123 --file memory.json
+//   cojanet-sync register --server https://... --admin <admin-token> --project career-ops --name "my-client"
+
+const fs = require("fs");
+const path = require("path");
+const { CoJanetSyncClient } = require("../src/lib/cojanetSyncClient-node.js");
+
+const command = process.argv[2];
+const args = {};
+
+// Parse CLI args
+for (let i = 3; i < process.argv.length; i++) {
+  if (process.argv[i].startsWith("--")) {
+    const key = process.argv[i].slice(2);
+    args[key] = process.argv[i + 1] || true;
+    i++;
+  }
+}
+
+const serverUrl = args.server || process.env.COJANET_SERVER_URL || "http://localhost:8787";
+const projectId = args.project || process.env.COJANET_PROJECT_ID || "career-ops";
+const clientToken = args.token || process.env.COJANET_CLIENT_TOKEN || "";
+const adminToken = args.admin || process.env.COJANET_SYNC_TOKEN || "";
+
+const client = new CoJanetSyncClient({ serverUrl, projectId, clientToken, adminToken });
+
+(async () => {
+  try {
+    switch (command) {
+      case "pull": {
+        const memory = await client.pullMemory();
+        console.log(JSON.stringify(memory, null, 2));
+        break;
+      }
+
+      case "push": {
+        const file = args.file || "memory.json";
+        if (!fs.existsSync(file)) {
+          throw new Error(`File not found: ${file}`);
+        }
+        const memory = JSON.parse(fs.readFileSync(file, "utf8"));
+        const mode = args.mode || "merge";
+        const result = await client.pushMemory(memory, mode);
+        console.log("Push successful:", JSON.stringify(result, null, 2));
+        break;
+      }
+
+      case "register": {
+        const clientName = args.name || "copilot-agent";
+        const result = await client.registerClient(clientName);
+        console.log("Client registered:", JSON.stringify(result, null, 2));
+        console.log(`\nSave this token in your environment:`);
+        console.log(`export COJANET_CLIENT_TOKEN="${result.clientToken}"`);
+        break;
+      }
+
+      case "health": {
+        const result = await client._request("GET", "/health");
+        console.log("Server healthy:", JSON.stringify(result, null, 2));
+        break;
+      }
+
+      default: {
+        console.log(`
+Co-Janet Sync CLI
+
+Usage:
+  cojanet-sync pull [--server URL] [--project ID] [--token TOKEN]
+    Fetch memory from server, output as JSON.
+
+  cojanet-sync push [--server URL] [--project ID] [--token TOKEN] [--file FILE] [--mode merge|replace]
+    Push memory file to server.
+
+  cojanet-sync register [--server URL] [--admin TOKEN] [--project ID] [--name NAME]
+    Create a new client token (requires admin token).
+
+  cojanet-sync health [--server URL]
+    Check if server is running.
+
+Environment variables:
+  COJANET_SERVER_URL    - Server URL (default: http://localhost:8787)
+  COJANET_PROJECT_ID    - Project ID (default: career-ops)
+  COJANET_CLIENT_TOKEN  - Client token for auth
+  COJANET_SYNC_TOKEN    - Admin token for registration
+
+Example:
+  export COJANET_SERVER_URL="https://sync.example.com"
+  export COJANET_PROJECT_ID="career-ops"
+  export COJANET_CLIENT_TOKEN="abc123..."
+  cojanet-sync pull > memory.json
+  cojanet-sync push --file memory.json
+`);
+      }
+    }
+  } catch (err) {
+    console.error("Error:", err.message);
+    process.exit(1);
+  }
+})();
